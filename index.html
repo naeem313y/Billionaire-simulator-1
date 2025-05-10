@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="favicon_io.zip" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spend Billionaires' Money - Billionaire Simulator</title>
@@ -471,6 +470,175 @@
             document.getElementById('spent-amount').textContent = '$' + gameState.spentMoney.toLocaleString();
 
             // Update quantities
-            <script async="async" data-cfasync="false" src="//pl26607601.profitableratecpm.com/d2b5c281c12ff4a3db541f65b08b43da/invoke.js"></script>
+            for (const id in gameState.purchases) {
+                document.querySelector(`.quantity[data-id="${id}"]`).textContent = gameState.purchases[id];
+            }
+        }
+
+        // Initialize first page
+        initItemsGrid();
+
+        // Second Page Script - Mukesh Ambani Game
+        // Initial money amount (8.5 lakh crore rupees)
+        let ambaniFortune = 8500000000000;
+
+        // Format number to Indian currency style
+        function formatIndianRupees(num) {
+            const str = num.toString();
+            let result = '';
+            let count = 0;
+            for (let i = str.length - 1; i >= 0; i--) {
+                count++;
+                result = str[i] + result;
+                if (count === 3 && i !== 0) {
+                    result = ',' + result;
+                } else if (count === 5 && i !== 0) {
+                    result = ',' + result;
+                    count = 0;
+                } else if (count === 2 && count !== 0 && i !== 0) {
+                    if ((str.length - i) % 2 === 0) {
+                        result = ',' + result;
+                        count = 0;
+                    }
+                }
+            }
+            return '₹' + result;
+        }
+
+        // Update money display for Ambani game
+        function updateAmbaniMoney() {
+            document.getElementById('ambani-money').textContent = formatIndianRupees(ambaniFortune);
+        }
+
+        // Items data for Ambani game
+        const ambaniItems = [
+            { id: 1, name: 'वड़ा पाव', price: 15, image: '🍔', count: 0 },
+            { id: 2, name: 'चाय', price: 10, image: '☕', count: 0 },
+            { id: 3, name: 'मूवी टिकट', price: 300, image: '🎟️', count: 0 },
+            { id: 4, name: 'ब्रांडेड शर्ट', price: 2000, image: '👔', count: 0 },
+            { id: 5, name: 'स्मार्टफोन', price: 70000, image: '📱', count: 0 },
+            { id: 6, name: 'रॉयल एनफील्ड बाइक', price: 250000, image: '🏍️', count: 0 },
+            { id: 7, name: 'टाटा नेक्सन', price: 800000, image: '🚗', count: 0 },
+            { id: 8, name: 'सोने की बार (1 किग्रा)', price: 7000000, image: '🔶', count: 0 },
+            { id: 9, name: 'मुंबई में लक्जरी अपार्टमेंट', price: 50000000, image: '🏢', count: 0 },
+            { id: 10, name: 'प्राइवेट जेट', price: 30000000000, image: '✈️', count: 0 },
+            { id: 11, name: 'आईपीएल टीम', price: 400000000000, image: '🏏', count: 0 },
+            { id: 12, name: 'अंटीलिया जैसा घर', price: 1300000000000, image: '🏰', count: 0 },
+            { id: 13, name: 'उपग्रह लॉन्च करना', price: 3000000000000, image: '🛰️', count: 0 },
+            { id: 14, name: 'SpaceX जैसी कंपनी', price: 10000000000000, image: '🚀', count: 0 }
+        ];
+
+        // Initialize Ambani game items
+        function initAmbaniItems() {
+            const itemsContainer = document.getElementById('ambani-items');
+            itemsContainer.innerHTML = '';
+            
+            ambaniItems.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'bg-white rounded-lg shadow-md p-4 flex flex-col items-center';
+                
+                itemCard.innerHTML = `
+                    <div class="text-4xl mb-2">${item.image}</div>
+                    <h3 class="text-xl font-semibold mb-1">${item.name}</h3>
+                    <p class="text-lg font-medium text-blue-600 mb-4">${formatIndianRupees(item.price)}</p>
+                    <div class="flex items-center w-full">
+                        <button class="sell-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50 flex-1" data-id="${item.id}" disabled>बेचें</button>
+                        <span class="count-display mx-4 text-center w-16">${item.count}</span>
+                        <button class="buy-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex-1" data-id="${item.id}">खरीदें</button>
+                    </div>
+                `;
+                
+                itemsContainer.appendChild(itemCard);
+            });
+
+            // Event listeners for buy buttons
+            document.querySelectorAll('.buy-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.getAttribute('data-id');
+                    const item = ambaniItems.find(item => item.id === parseInt(id));
+                    
+                    if (ambaniFortune >= item.price) {
+                        ambaniFortune -= item.price;
+                        item.count++;
+                        updateItemDisplay(item);
+                        updateAmbaniMoney();
+                    }
+                });
+            });
+
+            // Event listeners for sell buttons
+            document.querySelectorAll('.sell-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.getAttribute('data-id');
+                    const item = ambaniItems.find(item => item.id === parseInt(id));
+                    
+                    if (item.count > 0) {
+                        ambaniFortune += item.price;
+                        item.count--;
+                        updateItemDisplay(item);
+                        updateAmbaniMoney();
+                    }
+                });
+            });
+        }
+
+        // Update item display for Ambani game
+        function updateItemDisplay(item) {
+            const itemCard = document.querySelector(`.buy-btn[data-id="${item.id}"]`).closest('.bg-white');
+            const countDisplay = itemCard.querySelector('.count-display');
+            const sellBtn = itemCard.querySelector('.sell-btn');
+            
+            countDisplay.textContent = item.count;
+            
+            if (item.count > 0) {
+                sellBtn.disabled = false;
+            } else {
+                sellBtn.disabled = true;
+            }
+            
+            // Disable buy button if not enough money
+            const buyBtn = itemCard.querySelector('.buy-btn');
+            if (ambaniFortune < item.price) {
+                buyBtn.disabled = true;
+            } else {
+                buyBtn.disabled = false;
+            }
+            
+            // Update all buy buttons based on available money
+            updateAllBuyButtons();
+        }
+
+        // Update all buy buttons based on available money for Ambani game
+        function updateAllBuyButtons() {
+            ambaniItems.forEach(item => {
+                const buyBtn = document.querySelector(`.buy-btn[data-id="${item.id}"]`);
+                if (buyBtn && ambaniFortune < item.price) {
+                    buyBtn.disabled = true;
+                } else if (buyBtn) {
+                    buyBtn.disabled = false;
+                }
+            });
+        }
+
+        // Page switching functionality
+        document.getElementById('mukesh-ambani-option').addEventListener('click', function() {
+            document.getElementById('billionaire-selector-page').style.display = 'none';
+            document.getElementById('mukesh-ambani-game').style.display = 'block';
+            
+            // Initialize Ambani game if not already initialized
+            initAmbaniItems();
+            updateAmbaniMoney();
+            updateAllBuyButtons();
+        });
+
+        // Back button functionality
+        document.getElementById('back-to-selector').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('mukesh-ambani-game').style.display = 'none';
+            document.getElementById('billionaire-selector-page').style.display = 'block';
+        });
+    </script>
+    <script async="async" data-cfasync="false" src="//pl26607601.profitableratecpm.com/d2b5c281c12ff4a3db541f65b08b43da/invoke.js"></script>
 <div id="container-d2b5c281c12ff4a3db541f65b08b43da"></div>
-          
+</body>
+</html>
