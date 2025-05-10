@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spend Billionaires' Money - Billionaire Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .money-counter {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2ecc71;
+            transition: all 0.3s ease;
+        }
+        .money-counter.overspent {
+            color: #e74c3c;
+        }
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .item-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .item-card:hover {
+            transform: translateY(-5px);
+        }
+        .item-image {
+            height: 180px;
+            overflow: hidden;
+        }
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-decrease {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+        .btn-decrease:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-increase {
+            background-color: #d4edda;
+            color: #28a745;
+        }
+        .btn-increase:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        .quantity {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        .billionaire-selector {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .billionaire-option {
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .billionaire-option:hover {
+            background-color: #f0f2f5;
+        }
+        .billionaire-option.active {
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            margin-top: 40px;
+        }
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+            background-color: rgba(255,255,255,0.4);
+            transform: translateY(-3px);
+        }
+        /* Animation for donation section */
+        @keyframes donationSlide {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .donation-animation {
+            animation: donationSlide 0.5s ease forwards;
+        }
+        .donation-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        .donation-section.show {
+            max-height: 1000px;
+        }
+        /* Donation section styles */
+        .donation-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .qr-code-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .qr-code-image {
+            max-width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .donation-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        /* Mukesh Ambani Game Specific Styles */
+        #mukesh-ambani-game {
+            display: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        .game-page {
+            width: 100%;
+            min-height: 100vh;
+        }
+        /* Navigation */
+        .back-button {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+        .logo-container {
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+        .logo-container img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- First Page - Billionaire Selector -->
+    <div id="billionaire-selector-page" class="game-page">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Game Logo -->
+            <div class="logo-container">
+                <img src="https://page.genspark.site/v1/base64_upload/26bd54387e3df2afaed736fd340df4a4" alt="Billionaire Simulator Logo">
+            </div>
+            
+            <!-- Game Title -->
+            <h1 class="text-4xl font-bold text-center my-6">Spend Billionaires' Money</h1>
+            
+            <!-- Billionaire Selector -->
+            <div class="billionaire-selector">
+                <h2 class="text-2xl font-bold mb-4">Choose a Billionaire</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div id="mukesh-ambani-option" class="billionaire-option active" data-name="Mukesh Ambani" data-worth="100000000000">
+                        <h3 class="text-xl font-bold">Mukesh Ambani</h3>
+                        <p class="text-gray-600">Net Worth: $100,000,000,000</p>
+                        <p class="text-sm text-gray-500">Chairman of Reliance Industries</p>
+                    </div>
+                    <div class="billionaire-option" data-name="Gautam Adani" data-worth="56300000000">
+                        <h3 class="text-xl font-bold">Gautam Adani</h3>
+                        <p class="text-gray-600">Net Worth: $56,300,000,000</p>
+                        <p class="text-sm text-gray-500">Chairman of Adani Group</p>
+                    </div>
+                    <div class="billionaire-option" data-name="Elon Musk" data-worth="330000000000">
+                        <h3 class="text-xl font-bold">Elon Musk</h3>
+                        <p class="text-gray-600">Net Worth: $330,000,000,000</p>
+                        <p class="text-sm text-gray-500">CEO of Tesla, SpaceX, and X</p>
+                    </div>
+                </div>
+                <div class="text-center mt-6">
+                    <p class="text-gray-600">Click on Mukesh Ambani to start the game</p>
+                </div>
+            </div>
+            
+            <!-- Header with Money Counter -->
+            <div class="header p-4 mb-6">
+                <h2 class="text-xl font-bold mb-2" id="billionaire-name">Spend Mukesh Ambani's Money</h2>
+                <div class="money-counter" id="money-counter">$100,000,000,000</div>
+                <div class="flex justify-between items-center mt-4">
+                    <div class="text-gray-600">You've spent: <span id="spent-amount">$0</span></div>
+                    <button id="donation-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">Donate to Organization</button>
+                </div>
+            </div>
+            
+            <!-- Donation Section - UPDATED WITH USER'S QR CODE -->
+            <div id="donation-section" class="donation-section bg-white rounded-lg p-6 mb-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4">Donate to Our Organization</h3>
+                
+                <!-- PhonePe QR Code -->
+                <div class="donation-card">
+                    <h4 class="font-bold text-lg">Scan PhonePe QR Code</h4>
+                    <div class="qr-code-container">
+                        <img src="https://page.genspark.site/v1/base64_upload/592b53bc0c4c665203df401ae4da5e19" alt="PhonePe QR Code" class="qr-code-image">
+                    </div>
+                </div>
+                
+                <!-- UPI ID -->
+                <div class="donation-card">
+                    <h4 class="font-bold text-lg">UPI ID</h4>
+                    <div class="donation-details">
+                        <p class="text-blue-600 font-medium">naeembhai078@ybl</p>
+                    </div>
+                </div>
+                
+                <!-- Bank Account Details -->
+                <div class="donation-card">
+                    <h4 class="font-bold text-lg">Bank Account Details</h4>
+                    <div class="donation-details">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div>
+                                <p class="text-gray-600">Account Number:</p>
+                                <p class="font-medium">008710581626</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">IFSC Code:</p>
+                                <p class="font-medium">IPOS0000001</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-gray-600">Account Holder Name:</p>
+                            <p class="font-medium">MD NAEEM AKHTAR</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Items Grid -->
+            <div class="items-grid" id="items-grid">
+                <!-- Items will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="p-8">
+            <div class="container mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex flex-col items-center md:items-start mb-6 md:mb-0">
+                        <h3 class="text-xl font-bold mb-2">Created By</h3>
+                        <div class="flex items-center">
+                            <img src="https://page.genspark.site/v1/base64_upload/077af63f14a9570cdef43e5421a718e7" alt="Profile Picture" class="profile-pic mr-4">
+                            <div>
+                                <h4 class="text-lg font-bold">MD Naeem Akhtar</h4>
+                                <p class="text-gray-300">Web Developer & Creator</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center md:items-end">
+                        <h3 class="text-xl font-bold mb-2">Connect With Me</h3>
+                        <div class="flex space-x-4">
+                            <a href="https://www.instagram.com/naeem_bhai_078" target="_blank" class="social-icon">
+                                <i class="ri-instagram-line text-xl"></i>
+                            </a>
+                            <a href="mailto:naeemediting2023@gmail.com" class="social-icon">
+                                <i class="ri-mail-line text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-6 border-gray-700">
+                <div class="text-center">
+                    <h3 class="text-xl font-bold mb-2">Contact Us</h3>
+                    <p class="mb-2">Email: <a href="mailto:naeemediting2023@gmail.com" class="text-blue-300 hover:underline">naeemediting2023@gmail.com</a></p>
+                    <p class="mb-2">Instagram: <a href="https://www.instagram.com/naeem_bhai_078" target="_blank" class="text-blue-300 hover:underline">@naeem_bhai_078</a></p>
+                    <p class="text-sm text-gray-400 mt-4">&copy; 2025 MD Naeem Akhtar. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Second Page - Mukesh Ambani Game -->
+    <div id="mukesh-ambani-game" class="game-page">
+        <a href="#" class="back-button" id="back-to-selector">← वापस जाएं</a>
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-2">मुकेश अंबानी के पैसे खर्च करें</h1>
+                <div class="text-2xl font-semibold sticky top-0 bg-white shadow-lg p-4 rounded-lg z-10 mb-6">
+                    <span id="ambani-money">₹8,50,00,00,00,000</span> रुपये बचे हैं
+                </div>
+            </header>
+            <div id="ambani-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Items will be dynamically inserted here -->
+            </div>
+        </div>
+        <footer class="text-center py-6 mt-12 bg-gray-200">
+            <p>Neal.fun के Spend Bill Gates' Money की तर्ज पर बनाया गया</p>
+        </footer>
+    </div>
+    
+    <script>
+        // First Page Script
+        // Items data for first page
+        const items = [
+            { id: 1, name: "Big Mac", price: 2, image: "https://neal.fun/spend/images/big-mac.jpg" },
+            { id: 2, name: "Flip Flops", price: 3, image: "https://neal.fun/spend/images/flip-flops.jpg" },
+            { id: 3, name: "Coca-Cola Pack", price: 5, image: "https://neal.fun/spend/images/coca-cola-pack.jpg" },
+            { id: 4, name: "Movie Ticket", price: 12, image: "https://neal.fun/spend/images/movie-ticket.jpg" },
+            { id: 5, name: "Book", price: 15, image: "https://neal.fun/spend/images/book.jpg" },
+            { id: 6, name: "Lobster Dinner", price: 45, image: "https://neal.fun/spend/images/lobster-dinner.jpg" },
+            { id: 7, name: "Video Game", price: 60, image: "https://neal.fun/spend/images/video-game.jpg" },
+            { id: 8, name: "Amazon Echo", price: 99, image: "https://neal.fun/spend/images/amazon-echo.jpg" },
+            { id: 9, name: "Year of Netflix", price: 100, image: "https://neal.fun/spend/images/year-of-netflix.jpg" },
+            { id: 10, name: "Air Jordans", price: 125, image: "https://neal.fun/spend/images/air-jordans.jpg" },
+            { id: 11, name: "Airpods", price: 199, image: "https://neal.fun/spend/images/airpods.jpg" },
+            { id: 12, name: "Gaming Console", price: 299, image: "https://neal.fun/spend/images/gaming-console.jpg" }
+        ];
+
+        // Game state
+        let gameState = {
+            billionaire: "Mukesh Ambani",
+            totalMoney: 100000000000,
+            remainingMoney: 100000000000,
+            spentMoney: 0,
+            purchases: {}
+        };
+
+        // Initialize items grid for first page
+        function initItemsGrid() {
+            const itemsGrid = document.getElementById('items-grid');
+            itemsGrid.innerHTML = '';
+            items.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <div class="item-image">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+                        <p class="text-blue-600 font-bold mb-4">$${item.price.toLocaleString()}</p>
+                        <div class="quantity-control">
+                            <button class="btn btn-decrease" data-id="${item.id}">-</button>
+                            <span class="quantity" data-id="${item.id}">0</span>
+                            <button class="btn btn-increase" data-id="${item.id}">+</button>
+                        </div>
+                    </div>
+                `;
+                itemsGrid.appendChild(itemCard);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.btn-increase').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const item = items.find(item => item.id == id);
+                    if (gameState.remainingMoney >= item.price) {
+                        if (!gameState.purchases[id]) {
+                            gameState.purchases[id] = 0;
+                        }
+                        gameState.purchases[id]++;
+                        gameState.remainingMoney -= item.price;
+                        gameState.spentMoney += item.price;
+                        updateDisplay();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-decrease').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    if (gameState.purchases[id] && gameState.purchases[id] > 0) {
+                        const item = items.find(item => item.id == id);
+                        gameState.purchases[id]--;
+                        gameState.remainingMoney += item.price;
+                        gameState.spentMoney -= item.price;
+                        updateDisplay();
+                    }
+                });
+            });
+
+            // Donation button
+            document.getElementById('donation-btn').addEventListener('click', function() {
+                const donationSection = document.getElementById('donation-section');
+                donationSection.classList.toggle('show');
+                if (donationSection.classList.contains('show')) {
+                    donationSection.classList.add('donation-animation');
+                }
+            });
+        }
+
+        function updateDisplay() {
+            // Update money counter
+            document.getElementById('money-counter').textContent = '$' + gameState.remainingMoney.toLocaleString();
+            document.getElementById('spent-amount').textContent = '$' + gameState.spentMoney.toLocaleString();
+
+            // Update quantities
+          
